@@ -17,7 +17,8 @@ class Flex(Page):
             ('Title_and_text', blocks.TitleAndTextBlock()),
             ("full_richtext", blocks.RichTextBlock()),
             ("simple_richtext", blocks.SimpleRichTextBlock()),
-            ("card", blocks.CardBlock())
+            ("card", blocks.CardBlock()),
+            ("cta", blocks.CtaBlock()),
         ],
         null=True,
         blank=True

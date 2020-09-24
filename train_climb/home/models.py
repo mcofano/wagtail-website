@@ -1,10 +1,11 @@
 from django.db import models
 
 from wagtail.core.models import Page
-from wagtail.admin.edit_handlers import FieldPanel, PageChooserPanel
+from wagtail.admin.edit_handlers import FieldPanel, PageChooserPanel, StreamFieldPanel
 from wagtail.images.edit_handlers import ImageChooserPanel
-from wagtail.core.fields import RichTextField
+from wagtail.core.fields import RichTextField, StreamField
 
+from streams import blocks
 
 class HomePage(Page):
     """Home page model"""
@@ -28,12 +29,23 @@ class HomePage(Page):
         on_delete=models.SET_NULL,
         related_name="+"
     )
+
+    content = StreamField(
+        [
+            ("cta", blocks.CtaBlock()),
+        ],
+        null=True,
+        blank=True
+    )
+
+
     # cms panel
     content_panels = Page.content_panels + [
         FieldPanel("banner_title"),
         FieldPanel("banner_subtitle"),
         ImageChooserPanel("banner_image"),
-        PageChooserPanel("banner_cta")
+        PageChooserPanel("banner_cta"),
+        StreamFieldPanel("content")
     ]
 
     class Meta:
