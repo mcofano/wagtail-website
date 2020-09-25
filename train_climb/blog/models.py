@@ -1,14 +1,67 @@
 from django.db import models
 from django.shortcuts import render
+from modelcluster.fields import ParentalKey, ForeignKey
 
-from wagtail.core.models import Page
-from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel, MultiFieldPanel
+from wagtail.core.models import Page, Orderable
+from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel, MultiFieldPanel, InlinePanel
+from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.core.fields import StreamField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from wagtail.snippets.models import register_snippet
 
 from streams import blocks
 
+class BlogAuthorsOrderable(Orderable):
+    """An intermediat table that allows to select more authors for a blog post page.
+    It implements a many to many relationship between blog detail page and authors."""
+
+    page = ParentalKey('blog.BlogDetailPage', related_name='blog_authors')
+    author = ForeignKey(
+        'blog.BlogAuthor',
+        on_delete=models.CASCADE
+    )
+
+    panel = [
+        SnippetChooserPanel('author')
+    ]
+
+class BlogAuthor(models.Model):
+    """Authors of the blog posts"""
+
+    name = models.CharField(max_length=100)
+    website = models.URLField(blank=True, null=True)
+    image = models.ForeignKey(
+        'wagtailimages.Image',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False,
+        related_name='+',
+    )
+
+    panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel('name'),
+                ImageChooserPanel('image')
+            ], heading='Name and Image',
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel('website')
+            ], heading='Links'
+        )
+    ]
+
+    def __str__(self):
+        """Representation of class"""
+        return self.name
+
+    class Meta:
+        verbose_name = 'Blog Author'
+        verbose_name_plural = 'Blog Authors'
+
+register_snippet(BlogAuthor)
 
 
 class BlogListingPage(RoutablePageMixin, Page):
@@ -70,6 +123,11 @@ class BlogDetailPage(Page):
     content_panels = Page.content_panels + [
         FieldPanel('custom_title'),
         ImageChooserPanel('blog_image'),
+        MultiFieldPanel(
+            [
+                InlinePanel('blog_authors', label="Author", min_num=1, max_num=4)
+            ], heading='Authors'
+        ),
         StreamFieldPanel("content")
     ]
 
