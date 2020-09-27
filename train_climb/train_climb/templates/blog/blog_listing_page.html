@@ -10,8 +10,8 @@
         <div class="row mt-5 mb-5">
             <div class="col-sm-3">
                 <a href="{{ post.url }}">
-                    {% image post.blog_image fill-250x250 as blog_img %}
-                        <img src="{{ blog_img.url }}" alt="{{ blog_img.alt }}" style='width=100%;'>
+                    {% image post.banner_image fill-250x250 as img %}
+                        <img src="{{ img.url }}" alt="{{ img.alt }}" style='width=100%;'>
                 </a>
             </div>
             <div class="col-sm-8">

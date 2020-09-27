@@ -9,6 +9,9 @@
     <div class="container mt-5 mb-5">
         <div class="text-center">
             <h1>{{ self.custom_title }}</h1>
+            {% if self.subtitle %}
+                <h3>{{ self.subtitle }}</h3>
+            {% endif %}
             {% if self.categories.count %}
                 <div style="padding: 0 20px 20px">
                     {% for cat in self.categories.all %}
@@ -18,6 +21,7 @@
                     {% endfor %}
                     </div>
             {% endif %}
+
             <div class="d-flex justify-content-center">
                 {% for iter in self.blog_authors.all %}
                     {% image iter.author.image fill-50x50 as img %}
@@ -35,11 +39,17 @@
                 {% endfor %}
             </div>
         </div>
-    </div>
+
 
     <div class="container">
+        <div class="center row mb-3">
+            <div class="col-lg-10 offset-lg-2">
+                {% image self.intro_image fill-2000x400 as img %}
+                <img src="{{ img.url }}" alt="{{ img.alt }}" style='center height: auto;'>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-lg-8 offset-lg-2">
+            <div class="center col-lg-8 offset-lg-2">
                 {% for block in self.content %}
                     {% include_block block %}
                 {% endfor %}
