@@ -3,15 +3,41 @@
 
 {% block content %}
 
-    <h1>{{ self.title }}</h1>
-    <p>
-        {{ self.intro|richtext }}
-    </p>
+    <style>
+        .contact-form {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .contact-form li {
+            margin-bottom: 1.5rem;
+        }
+        .contact-form label {
+            display: block;
+            font-weight: bold;
+        }
+        .contact-form .helptext {
+            display: block;
+            font-size: 80%;
+        }
+    </style>
 
-    <form action="{% pageurl page %}" method="POST" target="_blank">
-        {% csrf_token %}
-        {{ form.as_ul }}
+    <div class="container mt-5 mb-5">
+        <h1>{{ page.title }}</h1>
+        <p>
+            {{ self.intro|richtext }}
+        </p>
 
-        <input type="submit">
-    </form>
+        <form action="{% pageurl page %}" method="POST" target="_blank">
+            {% csrf_token %}
+            <ul class="contact-form">
+                {{ form.as_ul }}
+            </ul>
+
+            <input type="submit">
+<!--            <button type="button" class="btn btn-success">-->
+<!--                Submit Form-->
+<!--            </button>-->
+        </form>
+    </div>
+
 {% endblock %}

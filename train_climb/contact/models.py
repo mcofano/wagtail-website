@@ -5,6 +5,7 @@ from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldRowPanel, FieldPanel, InlinePanel, MultiFieldPanel
 from wagtail.core.fields import RichTextField
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtailcaptcha.models import WagtailCaptchaEmailForm
 
 class FormField(AbstractFormField):
     page = ParentalKey(
@@ -14,7 +15,7 @@ class FormField(AbstractFormField):
     )
 
 
-class ContactPage(AbstractEmailForm):
+class ContactPage(WagtailCaptchaEmailForm):
     """Contact page Form Page"""
     template = 'contact/contact_page.html'
 

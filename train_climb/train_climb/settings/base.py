@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'wagtail.admin',
     'wagtail.core',
 
+    'captcha',
+    'wagtailcaptcha',
+
     'modelcluster',
     'taggit',
 
@@ -169,3 +172,10 @@ WAGTAIL_SITE_NAME = "train_climb"
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'http://example.com'
+
+
+# Recaptcha settings
+# USE ENV VARIABLES
+RECAPTCHA_PUBLIC_KEY = '6LfJoNMZAAAAACaXZ-rX_Wbkcico3ywe406ZUMqu'
+RECAPTCHA_PRIVATE_KEY = '6LfJoNMZAAAAACe0vXQAZaOQ0WvF28nmFYLB19Gi'
+NOCAPTCHA = True
