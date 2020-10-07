@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django import forms
 from modelcluster.fields import ParentalKey, ForeignKey, ParentalManyToManyField
 from django.urls import re_path
-
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 from wagtail.core.models import Page, Orderable
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel, MultiFieldPanel, InlinePanel
@@ -12,6 +13,7 @@ from wagtail.core.fields import StreamField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.snippets.models import register_snippet
+
 
 from streams import blocks
 
@@ -194,6 +196,13 @@ class BlogDetailPage(Page):
         ),
         StreamFieldPanel("content")
     ]
+
+    def save(self, *args, **kwargs):
+        print('SAVING')
+        key = make_template_fragment_key('blog_post_preview',
+                                [self.id])
+        cache.delete(key)
+        return super().save(*args, **kwargs)
 
 # Article for the blog
 class ArticleBlogPage(BlogDetailPage):
