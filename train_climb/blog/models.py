@@ -1,3 +1,5 @@
+from abc import ABC
+
 from django.db import models
 from django.shortcuts import render
 from django import forms
@@ -7,7 +9,6 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from rest_framework.fields import Field
 
-
 from wagtail.api.v2.views import APIField
 from wagtail.core.models import Page, Orderable
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel, MultiFieldPanel, InlinePanel
@@ -16,10 +17,19 @@ from wagtail.core.fields import StreamField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.snippets.models import register_snippet
-
+from wagtail.images.api.fields import ImageRenditionField
 
 from streams import blocks
 
+
+# class ImageSerializedField(Field):
+#     def to_representation(self, value):
+#         return {
+#             'url': value.file.url,
+#             'title': value.title,
+#             'width': value.width,
+#             'height': value.height
+#         }
 
 class BlogAuthorsOrderable(Orderable):
     """An intermediat table that allows to select more authors for a blog post page.
@@ -43,9 +53,21 @@ class BlogAuthorsOrderable(Orderable):
     def author_website(self):
         return self.author.website
 
+    @property
+    def author_image(self):
+        return self.author.image
+
     api_fields = [
         APIField('author_name'),
-        APIField('author_website')
+        APIField('author_website'),
+        # APIField('author_image', serializer=ImageSerializedField())
+        APIField(
+            ' image',
+            serializer=ImageRenditionField(
+                'fill-200x250',
+                source='author_image'
+            )
+        )
     ]
 
 
@@ -110,6 +132,7 @@ class BlogCategory(models.Model):
     def __str__(self):
         return self.name
 
+
 register_snippet(BlogCategory)
 
 
@@ -166,6 +189,19 @@ class BlogListingPage(RoutablePageMixin, Page):
         return render(request, 'blog/latest_posts.html', context)
 
 
+class CategorySerializer(Field):
+    def to_representation(self, value):
+        data = []
+        for category in value.all():
+            data = data + [
+                {'id': category.id,
+                 'name': category.name,
+                 'slug': category.slug
+                 }
+            ]
+        return data
+
+
 class BlogDetailPage(Page):
     """Blog pages"""
     custom_title = models.CharField(
@@ -184,18 +220,17 @@ class BlogDetailPage(Page):
 
     categories = ParentalManyToManyField('blog.BlogCategory')
 
-    @property
-    def post_categories(self):
-        data = []
-        for category in self.categories.all():
-            data = data + [
-                {'id': category.id,
-                 'name': category.name,
-                 'slug': category.slug
-                }
-            ]
-        return data
-
+    # @property
+    # def post_categories(self):
+    #     data = []
+    #     for category in self.categories.all():
+    #         data = data + [
+    #             {'id': category.id,
+    #              'name': category.name,
+    #              'slug': category.slug
+    #             }
+    #         ]
+    #     return data
 
     content = StreamField(
         [
@@ -228,7 +263,8 @@ class BlogDetailPage(Page):
     api_fields = [
         APIField('custom_title'),
         APIField('banner_image'),
-        APIField('post_categories'),
+        APIField('categories',
+                 serializer=CategorySerializer()),
         APIField('blog_authors'),
         APIField('content'),
     ]
@@ -236,9 +272,10 @@ class BlogDetailPage(Page):
     def save(self, *args, **kwargs):
         print('SAVING')
         key = make_template_fragment_key('blog_post_preview',
-                                [self.id])
+                                         [self.id])
         cache.delete(key)
         return super().save(*args, **kwargs)
+
 
 # Article for the blog
 class ArticleBlogPage(BlogDetailPage):
@@ -276,5 +313,3 @@ class ArticleBlogPage(BlogDetailPage):
         ),
         StreamFieldPanel("content")
     ]
-
-
