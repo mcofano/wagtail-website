@@ -5,7 +5,10 @@ from modelcluster.fields import ParentalKey, ForeignKey, ParentalManyToManyField
 from django.urls import re_path
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+from rest_framework.fields import Field
 
+
+from wagtail.api.v2.views import APIField
 from wagtail.core.models import Page, Orderable
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel, MultiFieldPanel, InlinePanel
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
@@ -30,6 +33,19 @@ class BlogAuthorsOrderable(Orderable):
 
     panel = [
         SnippetChooserPanel('author')
+    ]
+
+    @property
+    def author_name(self):
+        return self.author.name
+
+    @property
+    def author_website(self):
+        return self.author.website
+
+    api_fields = [
+        APIField('author_name'),
+        APIField('author_website')
     ]
 
 
@@ -93,7 +109,6 @@ class BlogCategory(models.Model):
 
     def __str__(self):
         return self.name
-
 
 register_snippet(BlogCategory)
 
@@ -169,6 +184,19 @@ class BlogDetailPage(Page):
 
     categories = ParentalManyToManyField('blog.BlogCategory')
 
+    @property
+    def post_categories(self):
+        data = []
+        for category in self.categories.all():
+            data = data + [
+                {'id': category.id,
+                 'name': category.name,
+                 'slug': category.slug
+                }
+            ]
+        return data
+
+
     content = StreamField(
         [
             ('Title_and_text', blocks.TitleAndTextBlock()),
@@ -195,6 +223,14 @@ class BlogDetailPage(Page):
             ], heading='Categories',
         ),
         StreamFieldPanel("content")
+    ]
+
+    api_fields = [
+        APIField('custom_title'),
+        APIField('banner_image'),
+        APIField('post_categories'),
+        APIField('blog_authors'),
+        APIField('content'),
     ]
 
     def save(self, *args, **kwargs):

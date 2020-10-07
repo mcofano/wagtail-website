@@ -10,9 +10,11 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
     InlinePanel
 )
+from wagtail.api import APIField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from wagtail.search import index
 
 from streams import blocks
 
@@ -68,6 +70,16 @@ class HomePage(RoutablePageMixin, Page):
         blank=True
     )
 
+    api_fields = [
+        APIField('banner_title'),
+        APIField('banner_subtitle'),
+        APIField('banner_image'),
+        APIField('banner_cta')
+    ]
+
+    search_fields = Page.search_fields + [
+        index.SearchField('first_published_at', partial_match=True, boost=2),
+    ]
 
     # cms panel
     content_panels = Page.content_panels + [
