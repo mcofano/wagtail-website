@@ -1,2 +1,4 @@
 train_climb/media/images/
 train_climb/cache/
+.idea
+local_env.py
